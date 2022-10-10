@@ -79,6 +79,9 @@ class Game {
         if (currentTime - this.startAnimationTime >= 500 * this.acceleration) {
             let oldX = this.x;
             let oldY = this.y;
+            if (this.direction.length>1){
+                this.direction.shift();
+            }
             if (this.direction[0] === "ArrowRight") {
                 oldX = this.x;
                 this.x = this.x + this.radius * 2;
@@ -94,9 +97,6 @@ class Game {
             if (this.direction[0] === "ArrowUp") {
                 oldY = this.y;
                 this.y = this.y - this.radius * 2;
-            }
-            if (this.direction.length>1){
-                this.direction.shift();
             }
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.arraySnackManage(oldX, oldY, this.x, this.y);
