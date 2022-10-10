@@ -1,3 +1,4 @@
+export const select = document.querySelector("#select-speed");
 export const canvas = document.querySelector("#canvas");
 export const canvasWidth = canvas.width =  window.innerWidth-4;
 const x = canvasWidth*0.0091;
@@ -8,4 +9,3 @@ if (y%2===0){
 }
 export const canvasHeight = canvas.height = y*2*(radius);
 export const ctx = canvas.getContext("2d");
-export const acceleration = 0.5;

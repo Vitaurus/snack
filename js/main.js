@@ -1,8 +1,8 @@
-import {ctx} from "./modules/variables.js";
+import {canvas, ctx} from "./modules/variables.js";
 import {canvasWidth} from "./modules/variables.js";
 import {canvasHeight} from "./modules/variables.js";
 import {radius} from "./modules/variables.js";
-import {acceleration} from "./modules/variables.js";
+import {select} from "./modules/variables.js";
 
 class Game {
     constructor(ctx, canvasWidth, canvasHeight, radius, acceleration) {
@@ -18,6 +18,7 @@ class Game {
         this.startAnimationTime = Date.now();
         this.meal = false;
         this.stop = false;
+        this.direction = [];
     }
 
     render() {
@@ -28,7 +29,6 @@ class Game {
         this.ctx.fill();
         this.ctx.closePath();
         this.arraySnackManage(this.x, this.y, this.x, this.y);
-        this.move = true;
     }
     calcArrow(){
     const x = Math.round(this.canvasWidth/(radius*2));
@@ -61,11 +61,10 @@ class Game {
     }
 
     manage(direction) {
-        if ((direction === "ArrowRight" && this.direction === "ArrowLeft" || this.direction === "ArrowRight" && direction === "ArrowLeft" || direction === "ArrowUp" && this.direction === "ArrowDown" || this.direction === "ArrowUp" && direction === "ArrowDown") || !this.move) {
+        if ((direction === "ArrowRight" && this.direction[0] === "ArrowLeft" && this.direction.length <=1 || this.direction[0] === "ArrowRight" && direction === "ArrowLeft" && this.direction.length <=1 || direction === "ArrowUp" && this.direction[0] === "ArrowDown" && this.direction.length <=1 || this.direction[0] === "ArrowUp" && direction === "ArrowDown") && this.direction.length <=1 ||this.direction.length>2) {
             return;
         }
-        this.direction = direction;
-        this.move = false;
+        this.direction.push(direction);
         this.animation();
     }
 
@@ -78,24 +77,26 @@ class Game {
         }
         const currentTime = Date.now();
         if (currentTime - this.startAnimationTime >= 500 * this.acceleration) {
-            this.move = true;
             let oldX = this.x;
             let oldY = this.y;
-            if (this.direction === "ArrowRight") {
+            if (this.direction[0] === "ArrowRight") {
                 oldX = this.x;
                 this.x = this.x + this.radius * 2;
             }
-            if (this.direction === "ArrowLeft") {
+            if (this.direction[0] === "ArrowLeft") {
                 oldX = this.x;
                 this.x = this.x - this.radius * 2;
             }
-            if (this.direction === "ArrowDown") {
+            if (this.direction[0] === "ArrowDown") {
                 oldY = this.y;
                 this.y = this.y + this.radius * 2;
             }
-            if (this.direction === "ArrowUp") {
+            if (this.direction[0] === "ArrowUp") {
                 oldY = this.y;
                 this.y = this.y - this.radius * 2;
+            }
+            if (this.direction.length>1){
+                this.direction.shift();
             }
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.arraySnackManage(oldX, oldY, this.x, this.y);
@@ -173,52 +174,55 @@ class Game {
         return {x: randomX, y: randomY};
     }
 }
-
-const game = new Game(ctx, canvasWidth, canvasHeight, radius, acceleration);
-game.render();
-game.calcArrow()
-document.addEventListener("keydown", (e) => {
-    switch (e.key) {
-        case "ArrowRight":
+select.addEventListener("change",(e)=>{
+    select.classList.add("dn");
+    canvas.classList.remove("dn");
+    const game = new Game(ctx, canvasWidth, canvasHeight, radius, e.target.value);
+    game.render();
+    game.calcArrow()
+    document.addEventListener("keydown", (e) => {
+        switch (e.key) {
+            case "ArrowRight":
+                game.manage("ArrowRight");
+                break;
+            case "ArrowDown":
+                game.manage("ArrowDown");
+                break;
+            case "ArrowLeft":
+                game.manage("ArrowLeft");
+                break;
+            case "ArrowUp":
+                game.manage("ArrowUp");
+                break;
+        }
+    });
+    const touchStart = {
+        x:0,
+        y:0,
+    }
+    document.addEventListener("touchstart", (e) => {
+        touchStart.x=e.touches[0].pageX;
+        touchStart.y=e.touches[0].pageY;
+    });
+    const deviation = 35;
+    document.addEventListener("touchmove", (e) => {
+        const {x,y} = touchStart;
+        const currentX = e.touches[0].pageX;
+        const currentY = e.touches[0].pageY;
+        if (currentX-x>=deviation){
             game.manage("ArrowRight");
-            break;
-        case "ArrowDown":
-            game.manage("ArrowDown");
-            break;
-        case "ArrowLeft":
+            return;
+        }
+        if (x-currentX>=deviation){
             game.manage("ArrowLeft");
-            break;
-        case "ArrowUp":
+            return;
+        }
+        if (currentY-y>=deviation){
+            game.manage("ArrowDown");
+            return;
+        }
+        if (y-currentY>=deviation){
             game.manage("ArrowUp");
-            break;
-    }
-});
-const touchStart = {
-    x:0,
-    y:0,
-}
-document.addEventListener("touchstart", (e) => {
-    touchStart.x=e.touches[0].pageX;
-    touchStart.y=e.touches[0].pageY;
-});
-const deviation = 35;
-document.addEventListener("touchmove", (e) => {
-    const {x,y} = touchStart;
-    const currentX = e.touches[0].pageX;
-    const currentY = e.touches[0].pageY;
-   if (currentX-x>=deviation){
-       game.manage("ArrowRight");
-       return;
-   }
-    if (x-currentX>=deviation){
-        game.manage("ArrowLeft");
-        return;
-    }
-    if (currentY-y>=deviation){
-        game.manage("ArrowDown");
-        return;
-    }
-    if (y-currentY>=deviation){
-        game.manage("ArrowUp");
-    }
+        }
+    })
 })
