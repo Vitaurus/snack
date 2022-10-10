@@ -5,7 +5,7 @@ import {radius} from "./modules/variables.js";
 import {acceleration} from "./modules/variables.js";
 
 class Game {
-    constructor(ctx, canvasWidth, canvasHeight, radius) {
+    constructor(ctx, canvasWidth, canvasHeight, radius, acceleration) {
         this.ctx = ctx;
         this.radius = radius;
         this.canvasWidth = canvasWidth;
@@ -30,10 +30,15 @@ class Game {
         this.arraySnackManage(this.x, this.y, this.x, this.y);
         this.move = true;
     }
-
-    arraySnackManage(x, y, newX, newY, push = false, check = false, index = [1,1,1], meal = this.meal) {
+    calcArrow(){
+    const x = Math.round(this.canvasWidth/(radius*2));
+    const y = Math.round(this.canvasHeight/(radius*2));
+    const arrow = x*y;
+        this.coeff = (Math.abs(0.1-this.acceleration))/arrow;
+    }
+    arraySnackManage(x, y, newX, newY, push = false, check = false, index = [1,1,1,1], meal = this.meal) {
         if (check) {
-            return this.arrayOfPixels.find(({x, y}, key) => meal.x + this.radius > x - this.radius && meal.x - this.radius < x + this.radius && meal.y + this.radius > y - this.radius && meal.y - this.radius < y + this.radius && key !==index[0]&&key !== index[1]&& key !== index[2]);
+            return this.arrayOfPixels.find(({x, y}, key) => Math.floor(meal.x) + Math.floor(this.radius) > Math.ceil(x) - Math.floor(this.radius) && Math.ceil(meal.x) - Math.floor(this.radius) < Math.floor(x) + Math.floor(this.radius) && Math.floor(meal.y) + Math.floor(this.radius) > Math.ceil(y) - Math.floor(this.radius) && Math.ceil(meal.y) - Math.floor(this.radius) < Math.floor(y) + Math.floor(this.radius) && key !==index[0]&&key !== index[1]&& key !== index[2]&& key !== index[3]);
         }
         if (this.arrayOfPixels.length === 0 || push) {
             this.arrayOfPixels.push({
@@ -59,8 +64,8 @@ class Game {
         if ((direction === "ArrowRight" && this.direction === "ArrowLeft" || this.direction === "ArrowRight" && direction === "ArrowLeft" || direction === "ArrowUp" && this.direction === "ArrowDown" || this.direction === "ArrowUp" && direction === "ArrowDown") || !this.move) {
             return;
         }
-        this.move = false;
         this.direction = direction;
+        this.move = false;
         this.animation();
     }
 
@@ -93,10 +98,10 @@ class Game {
                 this.y = this.y - this.radius * 2;
             }
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            this.arraySnackManage(oldX, oldY, this.x, this.y);
             this.snackDraw();
             this.mealRandomDraw();
-            this.arraySnackManage(oldX, oldY, this.x, this.y);
-            const checkCrush = this.arraySnackManage("", "", "", "", false, true, [0,1,2], {
+            const checkCrush = this.arraySnackManage("", "", "", "", false, true, [0,1,2,3], {
                 x: this.arrayOfPixels[0].x,
                 y: this.arrayOfPixels[0].y,
             });
@@ -110,7 +115,10 @@ class Game {
             }
             if (this.arraySnackManage("", "", "", "", false, true)) {
                 this.arraySnackManage("", "", this.x, this.y, true);
-                this.meal = false;
+                this.acceleration = this.acceleration-this.coeff;
+                this.meal = null;
+               this.animation();
+               return;
             }
             this.startAnimationTime = Date.now();
         }
@@ -168,6 +176,7 @@ class Game {
 
 const game = new Game(ctx, canvasWidth, canvasHeight, radius, acceleration);
 game.render();
+game.calcArrow()
 document.addEventListener("keydown", (e) => {
     switch (e.key) {
         case "ArrowRight":

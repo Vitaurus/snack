@@ -8,4 +8,4 @@ if (y%2===0){
 }
 export const canvasHeight = canvas.height = y*2*(radius);
 export const ctx = canvas.getContext("2d");
-export let acceleration = 0.1;
+export const acceleration = 0.5;
