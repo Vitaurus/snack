@@ -61,7 +61,7 @@ class Game {
         }
         this.move = false;
         this.direction = direction;
-        this.animationStop = this.animation();
+        this.animation();
     }
 
     animation = () => {
@@ -192,7 +192,7 @@ document.addEventListener("touchstart", (e) => {
     touchStart.x=e.touches[0].pageX;
     touchStart.y=e.touches[0].pageY;
 });
-const deviation = 30;
+const deviation = 100;
 document.addEventListener("touchmove", (e) => {
     const {x,y} = touchStart;
     const currentX = e.touches[0].pageX;
