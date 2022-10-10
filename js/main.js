@@ -192,7 +192,7 @@ document.addEventListener("touchstart", (e) => {
     touchStart.x=e.touches[0].pageX;
     touchStart.y=e.touches[0].pageY;
 });
-const deviation = 50;
+const deviation = 40;
 document.addEventListener("touchmove", (e) => {
     const {x,y} = touchStart;
     const currentX = e.touches[0].pageX;
