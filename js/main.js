@@ -204,12 +204,12 @@ select.addEventListener("change",(e)=> {
     select.classList.add("dn");
     canvas.classList.remove("dn");
     const game = new Game(ctx, canvasWidth, canvasHeight, radius, e.target.value);
-    const pageX = canvasWidth;
-    const pageY = canvasHeight;
+    let pageX = canvasWidth;
+    let pageY = canvasHeight;
     let triangles;
     if (pageY>pageX){
-        const diagonal = pageY/3;
-        const diagonalHalf = diagonal/2;
+       const diagonal = pageY/3;
+       const diagonalHalf = diagonal/2;
         triangles = {
             topTriangle:{
                 x1:pageX/2,
@@ -245,6 +245,45 @@ select.addEventListener("change",(e)=> {
             }
         }
     }
+    else {
+        const diagonal = pageX/3;
+        const diagonalHalf = diagonal/2;
+        triangles = {
+            leftTriangle:{
+                x1:(pageX-diagonal),
+                y1:pageY/2,
+                x2: (pageX-diagonal+diagonalHalf/2),
+                y2: pageY/2+diagonalHalf/2,
+                x3: (pageX-diagonal+diagonalHalf/2),
+                y3: pageY/2-diagonalHalf/2,
+            },
+            topTriangle:{
+                x1:(pageX-diagonal+diagonalHalf/2),
+                y1:pageY/2-diagonalHalf/2,
+                x2: (pageX-diagonal+diagonalHalf),
+                y2: pageY/2-diagonalHalf,
+                x3: (pageX-diagonalHalf+diagonalHalf/2),
+                y3: pageY/2-diagonalHalf/2,
+            },
+            rightTriangle:{
+                x1:(pageX-diagonalHalf+diagonalHalf/2),
+                y1:pageY/2-diagonalHalf/2,
+                x2: pageX,
+                y2: pageY/2,
+                x3: (pageX-diagonalHalf+diagonalHalf/2),
+                y3: pageY/2+diagonalHalf/2,
+            },
+            bottomTriangle:{
+                x1:(pageX-diagonalHalf+diagonalHalf/2),
+                y1:pageY/2+diagonalHalf/2,
+                x2: (pageX-diagonalHalf),
+                y2: pageY/2+diagonalHalf,
+                x3:  (pageX-diagonal+diagonalHalf/2),
+                y3: pageY/2+diagonalHalf/2,
+            },
+        }
+    }
+    console.log(triangles)
     game.valuesNav = triangles;
     game.render();
     game.calcArrow();
@@ -269,20 +308,30 @@ select.addEventListener("change",(e)=> {
         game.valuesNav = triangles;
         const touchX = e.touches[0].pageX;
         const touchY = e.touches[0].pageY;
-        if (touchY>triangles.topTriangle.y1&&touchY<triangles.topTriangle.y2&&touchX>triangles.topTriangle.x2&&touchX<triangles.topTriangle.x3){
-            game.manage("ArrowUp");
+        if (pageY>pageX){
+            if (touchY>triangles.topTriangle.y1&&touchY<triangles.topTriangle.y2&&touchX>triangles.topTriangle.x2&&touchX<triangles.topTriangle.x3){
+                game.manage("ArrowUp");
 
+            }
+            if (touchY>triangles.leftTriangle.y3&&touchY<triangles.leftTriangle.y1&&touchX>triangles.leftTriangle.x2&&touchX<triangles.leftTriangle.x1){
+                game.manage("ArrowLeft");
+            }
+        }
+        else {
+            if (touchY>triangles.topTriangle.y2&&touchY<triangles.topTriangle.y1&&touchX>triangles.topTriangle.x1&&touchX<triangles.topTriangle.x3){
+                game.manage("ArrowUp");
+            }
+
+            if (touchY>triangles.leftTriangle.y3&&touchY<triangles.leftTriangle.y2&&touchX>triangles.leftTriangle.x1&&touchX<triangles.leftTriangle.x2){
+                game.manage("ArrowLeft");
+            }
         }
         if (touchY>triangles.rightTriangle.y1&&touchY<triangles.rightTriangle.y3&&touchX>triangles.rightTriangle.x1&&touchX<triangles.rightTriangle.x2){
             game.manage("ArrowRight");
-
         }
         if (touchY>triangles.bottomTriangle.y1&&touchY<triangles.bottomTriangle.y2&&touchX>triangles.bottomTriangle.x3&&touchX<triangles.bottomTriangle.x1){
             game.manage("ArrowDown");
 
-        }
-        if (touchY>triangles.leftTriangle.y3&&touchY<triangles.leftTriangle.y1&&touchX>triangles.leftTriangle.x2&&touchX<triangles.leftTriangle.x1){
-            game.manage("ArrowLeft");
         }
     })
 })
