@@ -18,7 +18,10 @@ class Game {
         this.startAnimationTime = Date.now();
         this.meal = false;
         this.stop = false;
+        this.touchUse = false;
         this.direction = [];
+        this.windowWidth = window.innerWidth;
+        this.windowHeight = window.innerHeight;
     }
 
     render() {
@@ -100,6 +103,7 @@ class Game {
             }
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.arraySnackManage(oldX, oldY, this.x, this.y);
+            this.touchHelperDraw();
             this.snackDraw();
             this.mealRandomDraw();
             const checkCrush = this.arraySnackManage("", "", "", "", false, true, [0,1,2,3], {
@@ -173,14 +177,31 @@ class Game {
         }
         return {x: randomX, y: randomY};
     }
+    touchHelperDraw(){
+        if (!this.touchUse){
+            return;
+        }
+        this.ctx.beginPath();
+        this.ctx.moveTo(0,this.windowHeight/3);
+        this.ctx.lineTo(this.windowWidth,this.windowHeight/3);
+        this.ctx.stroke();
+        this.ctx.moveTo(0,this.windowHeight-this.windowHeight/3);
+        this.ctx.lineTo(this.windowWidth,this.windowHeight-this.windowHeight/3);
+        this.ctx.stroke();
+        this.ctx.moveTo(this.windowWidth/2,this.windowHeight/3);
+        this.ctx.lineTo(this.windowWidth/2,this.windowHeight-this.windowHeight/3);
+        this.ctx.stroke();
+        this.ctx.closePath();
+    }
 }
-select.addEventListener("change",(e)=>{
+select.addEventListener("change",(e)=> {
     select.classList.add("dn");
     canvas.classList.remove("dn");
     const game = new Game(ctx, canvasWidth, canvasHeight, radius, e.target.value);
     game.render();
     game.calcArrow()
     document.addEventListener("keydown", (e) => {
+        game.touchUse = false;
         switch (e.key) {
             case "ArrowRight":
                 game.manage("ArrowRight");
@@ -196,33 +217,26 @@ select.addEventListener("change",(e)=>{
                 break;
         }
     });
-    const touchStart = {
-        x:0,
-        y:0,
-    }
+    const pageX = window.innerWidth;
+    const pageY = window.innerHeight;
     document.addEventListener("touchstart", (e) => {
-        touchStart.x=e.touches[0].pageX;
-        touchStart.y=e.touches[0].pageY;
-    });
-    const deviation = 35;
-    document.addEventListener("touchmove", (e) => {
-        const {x,y} = touchStart;
-        const currentX = e.touches[0].pageX;
-        const currentY = e.touches[0].pageY;
-        if (currentX-x>=deviation){
-            game.manage("ArrowRight");
-            return;
-        }
-        if (x-currentX>=deviation){
-            game.manage("ArrowLeft");
-            return;
-        }
-        if (currentY-y>=deviation){
+        game.touchUse = true;
+        const touchX = e.touches[0].pageX;
+        const touchY = e.touches[0].pageY;
+        if (touchY>pageY-pageY/3){
             game.manage("ArrowDown");
             return;
         }
-        if (y-currentY>=deviation){
+        if (touchY<pageY/3){
             game.manage("ArrowUp");
+            return;
+        }
+        if (touchY>pageY/3&&touchY<pageY-pageY/3&&touchX<pageX/2){
+            game.manage("ArrowLeft");
+            return;
+        }
+        if (touchY>pageY/3&&touchY<pageY-pageY/3&&touchX>pageX/2){
+            game.manage("ArrowRight");
         }
     })
 })
