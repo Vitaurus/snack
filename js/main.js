@@ -18,10 +18,8 @@ class Game {
         this.startAnimationTime = Date.now();
         this.meal = false;
         this.stop = false;
-        this.touchUse = false;
+        this.valuesNav = false;
         this.direction = [];
-        this.windowWidth = window.innerWidth;
-        this.windowHeight = window.innerHeight;
     }
 
     render() {
@@ -31,6 +29,7 @@ class Game {
         this.ctx.stroke();
         this.ctx.fill();
         this.ctx.closePath();
+        this.touchHelperDraw();
         this.arraySnackManage(this.x, this.y, this.x, this.y);
     }
     calcArrow(){
@@ -133,6 +132,7 @@ class Game {
     snackDraw() {
         this.arrayOfPixels.forEach(({x, y}) => {
             this.ctx.beginPath();
+            this.ctx.fillStyle = "#000";
             this.ctx.arc(x, y, this.radius, 0, this.pi * 2, false);
             this.ctx.stroke();
             this.ctx.fill();
@@ -148,6 +148,7 @@ class Game {
             }
         }
         this.ctx.beginPath();
+        this.ctx.fillStyle = "#000";
         this.ctx.arc(this.randomValue.x, this.randomValue.y, this.radius, 0, this.pi * 2, false);
         this.ctx.stroke();
         this.ctx.fill();
@@ -178,19 +179,24 @@ class Game {
         return {x: randomX, y: randomY};
     }
     touchHelperDraw(){
-        if (!this.touchUse){
+        if (!this.valuesNav){
             return;
         }
         this.ctx.beginPath();
-        this.ctx.moveTo(0,this.windowHeight/3);
-        this.ctx.lineTo(this.windowWidth,this.windowHeight/3);
-        this.ctx.stroke();
-        this.ctx.moveTo(0,this.windowHeight-this.windowHeight/3);
-        this.ctx.lineTo(this.windowWidth,this.windowHeight-this.windowHeight/3);
-        this.ctx.stroke();
-        this.ctx.moveTo(this.windowWidth/2,this.windowHeight/3);
-        this.ctx.lineTo(this.windowWidth/2,this.windowHeight-this.windowHeight/3);
-        this.ctx.stroke();
+            this.ctx.fillStyle = "rgba(0, 0, 0, 0.08)"
+            this.ctx.moveTo(this.valuesNav.topTriangle.x1,this.valuesNav.topTriangle.y1);
+            this.ctx.lineTo(this.valuesNav.topTriangle.x2,this.valuesNav.topTriangle.y2);
+            this.ctx.lineTo(this.valuesNav.topTriangle.x3,this.valuesNav.topTriangle.y3);
+            this.ctx.moveTo(this.valuesNav.rightTriangle.x1,this.valuesNav.rightTriangle.y1);
+            this.ctx.lineTo(this.valuesNav.rightTriangle.x2,this.valuesNav.rightTriangle.y2);
+            this.ctx.lineTo(this.valuesNav.rightTriangle.x3,this.valuesNav.rightTriangle.y3);
+            this.ctx.moveTo(this.valuesNav.bottomTriangle.x1,this.valuesNav.bottomTriangle.y1);
+            this.ctx.lineTo(this.valuesNav.bottomTriangle.x2,this.valuesNav.bottomTriangle.y2);
+            this.ctx.lineTo(this.valuesNav.bottomTriangle.x3,this.valuesNav.bottomTriangle.y3);
+            this.ctx.moveTo(this.valuesNav.leftTriangle.x1,this.valuesNav.leftTriangle.y1);
+            this.ctx.lineTo(this.valuesNav.leftTriangle.x2,this.valuesNav.leftTriangle.y2);
+            this.ctx.lineTo(this.valuesNav.leftTriangle.x3,this.valuesNav.leftTriangle.y3);
+            this.ctx.fill();
         this.ctx.closePath();
     }
 }
@@ -198,10 +204,52 @@ select.addEventListener("change",(e)=> {
     select.classList.add("dn");
     canvas.classList.remove("dn");
     const game = new Game(ctx, canvasWidth, canvasHeight, radius, e.target.value);
+    const pageX = canvasWidth;
+    const pageY = canvasHeight;
+    let triangles;
+    if (pageY>pageX){
+        const diagonal = pageY/3;
+        const diagonalHalf = diagonal/2;
+        triangles = {
+            topTriangle:{
+                x1:pageX/2,
+                y1:pageY-diagonal,
+                x2: pageX/2-diagonalHalf/2,
+                y2: (pageY-diagonal)+diagonalHalf/2,
+                x3: pageX/2+diagonalHalf/2,
+                y3: (pageY-diagonal)+diagonalHalf/2,
+            },
+            rightTriangle:{
+                x1:pageX/2+diagonalHalf/2,
+                y1:(pageY-diagonal)+diagonalHalf/2,
+                x2: pageX/2+diagonalHalf,
+                y2: (pageY-diagonal)+diagonalHalf,
+                x3: pageX/2+diagonalHalf/2,
+                y3: (pageY-diagonal)+diagonalHalf+diagonalHalf/2,
+            },
+            bottomTriangle:{
+                x1:pageX/2+diagonalHalf/2,
+                y1:(pageY-diagonal)+diagonalHalf+diagonalHalf/2,
+                x2: pageX/2,
+                y2: pageY,
+                x3:  pageX/2-diagonalHalf/2,
+                y3: pageY-diagonalHalf/2,
+            },
+            leftTriangle:{
+                x1:pageX/2-diagonalHalf/2,
+                y1:pageY-diagonalHalf/2,
+                x2: pageX/2-diagonalHalf,
+                y2: pageY-diagonalHalf,
+                x3:  pageX/2-diagonalHalf/2,
+                y3: (pageY-diagonal)+diagonalHalf/2,
+            }
+        }
+    }
+    game.valuesNav = triangles;
     game.render();
-    game.calcArrow()
+    game.calcArrow();
     document.addEventListener("keydown", (e) => {
-        game.touchUse = false;
+        game.valuesNav = false;
         switch (e.key) {
             case "ArrowRight":
                 game.manage("ArrowRight");
@@ -217,26 +265,24 @@ select.addEventListener("change",(e)=> {
                 break;
         }
     });
-    const pageX = window.innerWidth;
-    const pageY = window.innerHeight;
     document.addEventListener("touchstart", (e) => {
-        game.touchUse = true;
+        game.valuesNav = triangles;
         const touchX = e.touches[0].pageX;
         const touchY = e.touches[0].pageY;
-        if (touchY>pageY-pageY/3){
-            game.manage("ArrowDown");
-            return;
-        }
-        if (touchY<pageY/3){
+        if (touchY>triangles.topTriangle.y1&&touchY<triangles.topTriangle.y2&&touchX>triangles.topTriangle.x2&&touchX<triangles.topTriangle.x3){
             game.manage("ArrowUp");
             return;
         }
-        if (touchY>pageY/3&&touchY<pageY-pageY/3&&touchX<pageX/2){
-            game.manage("ArrowLeft");
+        if (touchY>triangles.rightTriangle.y1&&touchY<triangles.rightTriangle.y3&&touchX>triangles.rightTriangle.x1&&touchX<triangles.rightTriangle.x2){
+            game.manage("ArrowRight");
             return;
         }
-        if (touchY>pageY/3&&touchY<pageY-pageY/3&&touchX>pageX/2){
-            game.manage("ArrowRight");
+        if (touchY>triangles.bottomTriangle.y1&&touchY<triangles.bottomTriangle.y2&&touchX>triangles.bottomTriangle.x3&&touchX<triangles.bottomTriangle.x1){
+            game.manage("ArrowDown");
+            return;
+        }
+        if (touchY>triangles.leftTriangle.y3&&touchY<triangles.leftTriangle.y1&&touchX>triangles.leftTriangle.x2&&touchX<triangles.leftTriangle.x1){
+            game.manage("ArrowLeft");
         }
     })
 })
