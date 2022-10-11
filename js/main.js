@@ -249,7 +249,7 @@ select.addEventListener("change", (e) => {
             }
         }
     } else {
-        const diagonal = pageX / 3;
+        const diagonal = pageX / 2.5;
         const diagonalHalf = diagonal / 2;
         triangles = {
             leftTriangle: {
@@ -286,7 +286,6 @@ select.addEventListener("change", (e) => {
             },
         }
     }
-    console.log(triangles)
     game.valuesNav = triangles;
     game.render();
     game.calcArrow();
