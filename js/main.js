@@ -271,15 +271,15 @@ select.addEventListener("change",(e)=> {
         const touchY = e.touches[0].pageY;
         if (touchY>triangles.topTriangle.y1&&touchY<triangles.topTriangle.y2&&touchX>triangles.topTriangle.x2&&touchX<triangles.topTriangle.x3){
             game.manage("ArrowUp");
-            return;
+
         }
         if (touchY>triangles.rightTriangle.y1&&touchY<triangles.rightTriangle.y3&&touchX>triangles.rightTriangle.x1&&touchX<triangles.rightTriangle.x2){
             game.manage("ArrowRight");
-            return;
+
         }
         if (touchY>triangles.bottomTriangle.y1&&touchY<triangles.bottomTriangle.y2&&touchX>triangles.bottomTriangle.x3&&touchX<triangles.bottomTriangle.x1){
             game.manage("ArrowDown");
-            return;
+
         }
         if (touchY>triangles.leftTriangle.y3&&touchY<triangles.leftTriangle.y1&&touchX>triangles.leftTriangle.x2&&touchX<triangles.leftTriangle.x1){
             game.manage("ArrowLeft");
